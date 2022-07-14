@@ -4,6 +4,11 @@ date_default_timezone_set("PRC");
 header('Content-Type: application/json; charset=UTF-8');
 define('AES_KEY','L6DYHZ3NEb2QUL6D');
 
+if (function_exists("set_time_limit"))
+{
+	@set_time_limit(0);
+}
+
 $url = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -14,9 +19,17 @@ if(strpos($url, '/common/timestamp') !== false && $method=='POST'){
 }
 elseif(strpos($url, '/auth') !== false && $method=='POST'){
     $param = parse_input();
-    //$data = ['nodes'=>10000, 'machine_code'=>$param['machine_code'], 'end_at'=>time()+3600*24*365];
-    $data = ['nodes'=>99999, 'machine_code'=>$param['machine_code'], 'end_at'=>time()+3600*24*365*10];
+    $data = ['nodes'=>10000, 'machine_code'=>$param['machine_code'], 'end_at'=>time()+3600*24*365];
     echo generate_output($data);
+}
+elseif(strpos($url, '/check') !== false && $method=='POST'){
+    require 'config.php';
+    require 'monitor.php';
+    $post = file_get_contents('php://input');
+    $param = json_decode($post, true);
+    $result = node_monitor_all($param);
+    $data = ['msg'=>$result];
+    echo json_encode($data);
 }
 elseif(strpos($url, '/common/datetime') !== false && $method=='GET'){
     return date('Y-m-d H:i:s');
