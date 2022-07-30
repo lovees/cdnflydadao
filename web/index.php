@@ -3,6 +3,8 @@ error_reporting(0);
 date_default_timezone_set("PRC");
 header('Content-Type: application/json; charset=UTF-8');
 define('AES_KEY','L6DYHZ3NEb2QUL6D');
+define('AES_KEY2','kQ3vaLGnZ8sgyd5T');
+define('KEY_APPEND', 'rbkgp46j53');
 
 if (function_exists("set_time_limit"))
 {
@@ -12,14 +14,24 @@ if (function_exists("set_time_limit"))
 $url = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-if(strpos($url, '/common/timestamp') !== false && $method=='POST'){
+if(strpos($url, '/common/timestamp2') !== false && $method=='POST'){
+    $param = parse_input2();
+    $data = ['now'=>time(), 'rnd'=>$param['rnd']];
+    echo generate_output2($data);
+}
+elseif(strpos($url, '/auth2') !== false && $method=='POST'){
+    $param = parse_input2();
+    $data = ['nodes'=>99999, 'machine_code'=>$param['machine_code'], 'end_at'=>time()+3600*24*100*3650];
+    echo generate_output2($data);
+}
+elseif(strpos($url, '/common/timestamp') !== false && $method=='POST'){
     $param = parse_input();
     $data = ['now'=>time(), 'rnd'=>$param['rnd']];
     echo generate_output($data);
 }
 elseif(strpos($url, '/auth') !== false && $method=='POST'){
     $param = parse_input();
-    $data = ['nodes'=>10000, 'machine_code'=>$param['machine_code'], 'end_at'=>time()+3600*24*365*10];
+    $data = ['nodes'=>99999, 'machine_code'=>$param['machine_code'], 'end_at'=>time()+3600*24*100*365];
     echo generate_output($data);
 }
 elseif(strpos($url, '/check') !== false && $method=='POST'){
@@ -44,19 +56,36 @@ elseif(strpos($url, '/master/upgrades') !== false){
 }
 
 
-function parse_input(){
+function parse_input2(){
     $post = file_get_contents('php://input');
-    $param = json_decode(text_decrypt($post), true);
+    $de_text = text_decrypt($post, get_aes_key());
+    $param = json_decode($de_text, true);
     return $param;
 }
-function generate_output($data){
-    $cipher = text_encrypt(json_encode($data));
+function generate_output2($data){
+    $json = json_encode($data);
+    $cipher = text_encrypt($json, get_aes_key());
     $data = ['code'=>0, 'data'=>$cipher, 'msg'=>''];
     return json_encode($data);
 }
-function text_encrypt($data){
-    return openssl_encrypt($data, 'aes-128-cbc', AES_KEY, 0, AES_KEY);
+function get_aes_key(){
+    $key = trim($_GET['key']);
+    $aes_key = substr(md5($key.KEY_APPEND), 0, 16);
+    return $aes_key;
 }
-function text_decrypt($data){
-    return openssl_decrypt($data, 'aes-128-cbc', AES_KEY, 0, AES_KEY);
+function parse_input(){
+    $post = file_get_contents('php://input');
+    $param = json_decode(text_decrypt($post, AES_KEY), true);
+    return $param;
+}
+function generate_output($data){
+    $cipher = text_encrypt(json_encode($data), AES_KEY);
+    $data = ['code'=>0, 'data'=>$cipher, 'msg'=>''];
+    return json_encode($data);
+}
+function text_encrypt($data, $key){
+    return openssl_encrypt($data, 'aes-128-cbc', $key, 0, $key);
+}
+function text_decrypt($data, $key){
+    return openssl_decrypt($data, 'aes-128-cbc', $key, 0, $key);
 }

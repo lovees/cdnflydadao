@@ -1,3 +1,4 @@
+更新说明：更新v5.1.13版本主控
 感谢大表哥提供主控和节点服务器特此广告：
 
 感谢OK源码中国网提供，（https://vsok.net) 精品资源源码请去OK源码中国下载
@@ -11,10 +12,32 @@ vi /etc/hosts
 0.0.0.0  auth.cdnfly.cn monitor.cdnfly.cn
 0.0.0.0  auth.cdnfly.cn monitor.cdnfly.cn
 2.主控
+v5.1.11版本安装脚本:
 curl -fsSL https://github.com/LoveesYe/cdnflydadao/raw/main/master.sh -o master.sh && chmod +x master.sh && ./master.sh --es-dir /home/es
 
+新v5.1.13版本安装脚本:
+
+curl -fsSL https://github.com/LoveesYe/cdnflydadao/raw/main/cdnfly/v5.1.13/master/master.sh -o master.sh && chmod +x master.sh && ./master.sh --es-dir /home/es
+
 3.被控
+v5.1.15版本安装脚本:
 curl -fsSL -m 5 https://github.com/LoveesYe/cdnflydadao/raw/main/agent/agent.sh -o agent.sh || curl -m 5 https://github.com/LoveesYe/cdnflydadao/raw/main/agent/agent.sh -o agent.sh  && chmod +x agent.sh && ./agent.sh --master-ver v5.1.11 --master-ip ip --es-ip ip --es-pwd passwd
+
+新v5.1.16版本安装脚本:
+curl -fsSL -m 5 https://github.com/LoveesYe/cdnflydadao/raw/main/cdnfly/v5.1.13/agent/agent.sh -o agent.sh || curl -m 5 https://github.com/LoveesYe/cdnflydadao/raw/main/cdnfly/v5.1.13/agent/agent.sh -o agent.sh  && chmod +x agent.sh && ./agent.sh --master-ver v5.1.11 --master-ip ip --es-ip ip --es-pwd passwd
+
+4.
+已安装过官方版的开心方法：
+执行以下命令完成开心：
+wget https://github.com/LoveesYe/cdnflydadao/raw/main/cdnfly/api.py -O /opt/venv/lib/python2.7/site-packages/requests/api.py
+supervisorctl -c /opt/cdnfly/master/conf/supervisord.conf reload
+
+如果旧版本要升级，可以先更新自建云端的文件，然后执行“已安装过官方版的开心方法”这一部分的命令，最后在主控后台升级。
+
+云端节点监控功能说明：
+
+监控默认是使用云端服务器去请求CDN节点，因此要保持云端和CDN节点之间的网络畅通。另外如果是用宝塔面板，php不要安装bt_safe扩展，否则无法使用tcp类型监控；如果要用ping类型监控，还需要允许exec函数。
+支持多节点监控（和官方一样），要添加其它监控节点，可以编辑config.php配置文件，根据里面的注释说明添加。
 
 修改为你自身安装节点,或使用默认的github节点安装
 /opt/cdnfly/master/panel/src/views/system/update/index.html
